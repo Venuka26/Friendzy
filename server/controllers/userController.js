@@ -2,7 +2,9 @@ import imagekit from "../configs/imageKit.js"
 import User from "../models/User.js"
 import fs from 'fs'
 import { clerkClient } from "@clerk/express";
-
+import { inngest } from "../inngest/index.js"
+import Connection from "../models/Connection.js"
+import Post from "../models/Post.js"
 
 // Get User Data using userId
 export const getUserData = async (req, res) => {
