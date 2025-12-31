@@ -12,7 +12,7 @@ const PostCard = ({post}) => {
 
     const postWithHashtags = post.content.replace(/(#\w+)/g, '<span class="text-indigo-600">$1</span>')
     const [likes, setLikes] = useState(post.likes_count)
-    const currentUser = dummyUserData
+    const currentUser =  useSelector((state)=>state.user.value)
 
     const { getToken } = useAuth()
 
