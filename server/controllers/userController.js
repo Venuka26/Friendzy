@@ -1,10 +1,11 @@
 import imagekit from "../configs/imageKit.js"
-import User from "../models/User.js"
-import fs from 'fs'
-import { clerkClient } from "@clerk/express";
 import { inngest } from "../inngest/index.js"
 import Connection from "../models/Connection.js"
 import Post from "../models/Post.js"
+import User from "../models/User.js"
+import fs from 'fs'
+import { clerkClient } from "@clerk/express";
+
 
 // Get User Data using userId
 export const getUserData = async (req, res) => {
@@ -99,7 +100,6 @@ export const updateUserData = async (req, res) => {
 }
 
 // Find Users using username, email, location, name
-
 export const discoverUsers = async (req, res) => {
     try {
         const { userId } = req.auth()
@@ -126,7 +126,6 @@ export const discoverUsers = async (req, res) => {
 }
 
 // Follow User
-
 export const followUser = async (req, res) => {
     try {
         const { userId } = req.auth()
@@ -270,6 +269,7 @@ export const acceptConnectionRequest = async (req, res) => {
         res.json({success: false, message: error.message})
     }
 }
+
 
 // Get User Profiles
 export const getUserProfiles = async (req, res) =>{

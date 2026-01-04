@@ -4,6 +4,7 @@ export const protect = async (req, res, next) => {
         if(!userId){
             return res.json({success: false, message: "not authenticated"  })
         }
+        req.user = { id: userId };
         next()
     } catch (error) {
         res.json({success: false, message: error.message  })
