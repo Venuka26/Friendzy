@@ -6,29 +6,35 @@ import Message from "../models/Message.js";
 const connections = {}; 
 
 // Controller function for the SSE endpoint
-export const sseController = (req, res)=>{
-    const { userId } = req.params
-    console.log('New client connected : ', userId)
+export const sseController = (req, res) => {
+  const { userId } = req.params;
+  const { token } = req.query;
 
-    // Set SSE headers
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+  if (!token) return res.status(401).end();
 
-    // Add the client's response object to the connections object
-    connections[userId] = res
+  const { userId: tokenUserId } = req.auth({ token });
 
-    // Send an initial event to the client
-    res.write('log: Connected to SSE stream\n\n');
+  if (tokenUserId !== userId) {
+    return res.status(401).end();
+  }
 
-    // Handle client disconnection
-    req.on('close', ()=>{
-        // Remove the client's response object from the connections array
-        delete connections[userId];
-        console.log('Client disconnected');
-    })
-}
+  // SSE headers
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+
+  if (!connections[userId]) connections[userId] = [];
+  connections[userId].push(res);
+
+  res.write(`data: ${JSON.stringify({ connected: true })}\n\n`);
+
+  req.on("close", () => {
+    connections[userId] = connections[userId].filter(r => r !== res);
+    if (!connections[userId].length) delete connections[userId];
+  });
+};
+
 
 // Send Message
 export const sendMessage = async (req, res) => {

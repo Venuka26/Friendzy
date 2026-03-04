@@ -7,6 +7,7 @@ import { useAuth } from '@clerk/clerk-react'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import CommentSection from "./comments/CommentSection";
+import { sharePost } from "../api/postApi";
 
 const PostCard = ({ post }) => {
 
@@ -49,6 +50,27 @@ const PostCard = ({ post }) => {
       toast.error(error.message)
     }
   }
+  const [shareCount, setShareCount] = useState(post.shares||0);
+  const handleShare = async () => {
+  try {
+    const token = await getToken();
+
+    const { data } = await sharePost(post._id, token);
+
+    if (data.success) {
+      setShareCount(data.shares);
+    }
+
+    const shareUrl = `${window.location.origin}/post/${post._id}`;
+
+    await navigator.clipboard.writeText(shareUrl);
+
+    toast.success("Post link copied!", { icon: "🔗" });
+
+  } catch (error) {
+    toast.error("Failed to share post");
+  }
+};
 
   return (
     <div className='bg-white rounded-xl shadow p-4 space-y-4 w-full max-w-2xl'>
@@ -122,11 +144,14 @@ const PostCard = ({ post }) => {
         </button>
 
         {/* SHARE */}
-        <div className='flex items-center gap-1'>
-          <Share2 className="w-4 h-4" />
-          <span>{7}</span>
-        </div>
+        <div
+        onClick={handleShare}
+        className="flex items-center gap-1 cursor-pointer hover:text-blue-500"
+      >
+        <Share2 className="w-4 h-4" />
+        <span>{shareCount}</span>
       </div>
+            </div>
 
       {/* COMMENTS SECTION */}
       {showComments && (

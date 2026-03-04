@@ -88,3 +88,27 @@ export const likePost = async (req, res) =>{
         res.json({ success: false, message: error.message });
     }
 }
+
+//Share
+export const sharePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    post.shares += 1;
+
+    await post.save();
+
+    res.json({
+      success: true,
+      shares: post.shares,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

@@ -21,20 +21,30 @@ export const addUserStory = async (req, res) =>{
             })
             media_url = response.url
         }
+
+        const expiresAt = new Date(
+              Date.now() + 24 * 60 * 60 * 1000
+            );
+
         // create story
         const story = await Story.create({
             user: userId,
             content,
             media_url,
             media_type,
-            background_color
+            background_color,
+             expiresAt
         })
 
         // schedule story deletion after 24 hours
         await inngest.send({
             name: 'app/story.delete',
-            data: { storyId: story._id }
-        })
+            data: {
+                storyId: story._id,
+                expiresAt: expiresAt.toISOString()
+            }
+            });
+
 
         res.json({success: true})
 

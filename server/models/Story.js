@@ -9,6 +9,11 @@ const storySchema = new mongoose.Schema({
     background_color: { type: String  },
 }, {timestamps: true, minimize: false})
 
+storySchema.index(
+  // { expiresAt: 1 },
+  // { expireAfterSeconds: 0 }
+);
+
 const Story = mongoose.model('Story', storySchema)
 
 export default Story;

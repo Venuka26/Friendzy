@@ -32,6 +32,12 @@ const Feed = () => {
   }
 
   useEffect(()=>{
+     const logToken = async () => {
+    const token = await getToken()
+    console.log("CLERK TOKEN:", token)
+  }
+
+  logToken()
     fetchFeeds()
   },[])
 

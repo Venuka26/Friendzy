@@ -117,19 +117,39 @@ const sendNewConnectionRequestReminder = inngest.createFunction(
 
 
 // Inngest Function to delete story after 24 hours
+// const deleteStory = inngest.createFunction(
+//     {id: 'story-delete'},
+//     { event: 'app/story.delete' },
+//     async ({ event, step }) => {
+//         const { storyId } = event.data;
+//         const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000)
+//         await step.sleepUntil('wait-for-24-hours', in24Hours)
+//         await step.run("delete-story", async () => {
+//             await Story.findByIdAndDelete(storyId)
+//             return { message: "Story deleted." }
+//         })
+//     }
+// )
+
 const deleteStory = inngest.createFunction(
-    {id: 'story-delete'},
-    { event: 'app/story.delete' },
-    async ({ event, step }) => {
-        const { storyId } = event.data;
-        const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000)
-        await step.sleepUntil('wait-for-24-hours', in24Hours)
-        await step.run("delete-story", async () => {
-            await Story.findByIdAndDelete(storyId)
-            return { message: "Story deleted." }
-        })
-    }
-)
+  { id: 'story-delete' },
+  { event: 'app/story.delete' },
+
+  async ({ event, step }) => {
+    const { storyId, expiresAt } = event.data;
+
+    // ⏳ Wait until EXACT expiry time
+    await step.sleepUntil(
+      'wait-for-story-expiry',
+      new Date(expiresAt)
+    );
+
+    await step.run("delete-story", async () => {
+      await storyId.findByIdAndDelete(storyId);
+      return { message: "Story deleted." };
+    });
+  }
+);
 
 
 const sendNotificationOfUnseenMessages = inngest.createFunction(

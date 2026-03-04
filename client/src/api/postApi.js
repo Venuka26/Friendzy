@@ -19,3 +19,14 @@ export const addComment = async (postId, text, token) =>
     },
   });
 
+  export const sharePost = async (postId, token) =>
+  api.post(
+    `/api/post/share/${postId}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
