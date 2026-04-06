@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { dummyMessagesData, dummyUserData } from '../assets/assets'
-import { ImageIcon, SendHorizonal } from 'lucide-react'
+import { ImageIcon, Phone, SendHorizonal } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '@clerk/clerk-react'
 import api from '../api/axios'
 import { addMessage, fetchMessages, resetMessages } from '../features/messages/messagesSlice'
 import toast from 'react-hot-toast'
+import CallModal from '../components/CallModal'
 
 const ChatBox = () => {
 
@@ -18,9 +18,18 @@ const ChatBox = () => {
   const [text, setText] = useState('')
   const [image, setImage] = useState(null)
   const [user, setUser] = useState(null)
+  const [showCallModal, setShowCallModal] = useState(false)
   const messagesEndRef = useRef(null)
 
   const connections = useSelector((state) => state.connections.connections)
+  const { followers, following } = useSelector((state) => state.connections)
+  const currentUser = useSelector((state) => state.user.value)
+
+  const isMutualFollow = (uid) => {
+    const iFollow = following.some(u => (u._id || u) === uid)
+    const theyFollow = followers.some(u => (u._id || u) === uid)
+    return iFollow && theyFollow
+  }
 
   const fetchUserMessages = async () => {
     try {
@@ -76,13 +85,23 @@ const ChatBox = () => {
   },[messages])
 
   return user && (
+    <>
     <div className='flex flex-col h-screen'>
       <div className='flex items-center gap-2 p-2 md:px-10 xl:pl-42 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-300'>
         <img src={user.profile_picture} alt="" className="size-8 rounded-full"/>
-        <div>
+        <div className='flex-1'>
           <p className="font-medium">{user.full_name}</p>
           <p className="text-sm text-gray-500 -mt-1.5">@{user.username}</p>
         </div>
+        {isMutualFollow(userId) && (
+          <button
+            onClick={() => setShowCallModal(true)}
+            className='p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-700 active:scale-95 transition cursor-pointer mr-2'
+            title="Call"
+          >
+            <Phone className="w-4 h-4"/>
+          </button>
+        )}
       </div>
       <div className='p-5 md:px-10 h-full overflow-y-scroll'>
         <div className='space-y-4 max-w-4xl mx-auto'>
@@ -122,6 +141,10 @@ const ChatBox = () => {
           </div>
       </div>
     </div>
+    {showCallModal && user && (
+      <CallModal user={user} currentUser={currentUser} onClose={() => setShowCallModal(false)} />
+    )}
+  </>
   )
 }
 
