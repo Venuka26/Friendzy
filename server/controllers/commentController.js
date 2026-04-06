@@ -36,7 +36,7 @@ export const getComments = async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId).populate(
       "comments.user",
-      "fullname profilePhoto"
+      "full_name profile_picture"
     );
 
     if (!post) {

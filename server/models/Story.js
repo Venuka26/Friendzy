@@ -7,11 +7,13 @@ const storySchema = new mongoose.Schema({
     media_type: {type: String, enum: ['text', 'image', 'video']},
     views_count: [{type: String, ref: 'User'}],
     background_color: { type: String  },
+    expiresAt: { type: Date,default: () => new Date(Date.now() + 24 * 60 * 60 * 1000)
+    }
 }, {timestamps: true, minimize: false})
 
 storySchema.index(
-  // { expiresAt: 1 },
-  // { expireAfterSeconds: 0 }
+  { expiresAt: 1 },
+  { expireAfterSeconds: 0 }
 );
 
 const Story = mongoose.model('Story', storySchema)

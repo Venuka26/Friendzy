@@ -79,14 +79,12 @@ const CommentSection = ({ postId, onCommentAdded }) => {
         comments.map((c) => (
           <div key={c._id} className="flex gap-3">
             <img
-              src={c.user?.profilePhoto}
-              alt=""
-              className="w-8 h-8 rounded-full"
+              src={c.user?.profile_picture || "https://via.placeholder.com/32"}
+              alt={c.user?.full_name}
+              className="w-8 h-8 rounded-full object-cover"
             />
             <div>
-              <p className="font-semibold text-sm">
-                {c.user?.fullname}
-              </p>
+              <p className="font-semibold text-sm">{c.user?.full_name}</p>
               <p className="text-sm text-gray-700">{c.text}</p>
             </div>
           </div>
