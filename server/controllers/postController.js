@@ -89,12 +89,29 @@ export const likePost = async (req, res) =>{
     }
 }
 
-//Share
+// Delete Post
+export const deletePost = async (req, res) => {
+    try {
+        const { userId } = req.auth()
+        const { postId } = req.params
+
+        const post = await Post.findById(postId)
+        if (!post) return res.json({ success: false, message: 'Post not found' })
+
+        if (post.user !== userId) {
+            return res.json({ success: false, message: 'Unauthorized' })
+        }
+
+        await Post.findByIdAndDelete(postId)
+        res.json({ success: true, message: 'Post deleted' })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+// Share Post
 export const sharePost = async (req, res) => {
   try {
-    const { postId } = req.params;
-
-    const post = await Post.findById(postId);
 
     if (!post) {
       return res.status(404).json({ message: "Post not found" });

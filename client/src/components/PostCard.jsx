@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { BadgeCheck, Heart, MessageCircle, Share2 } from 'lucide-react'
+import { BadgeCheck, Heart, MessageCircle, Share2, Trash2 } from 'lucide-react'
 import moment from 'moment'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 import CommentSection from "./comments/CommentSection";
 import { sharePost } from "../api/postApi";
 
-const PostCard = ({ post }) => {
+const PostCard = ({ post, showDelete = false }) => {
 
   const postWithHashtags = post.content?.replace(
     /(#\w+)/g,
@@ -18,6 +18,7 @@ const PostCard = ({ post }) => {
 
   const [likes, setLikes] = useState(post.likes_count)
   const [showComments, setShowComments] = useState(false)
+  const [deleted, setDeleted] = useState(false)
 
   // 🔥 NEW: local comment count state
   const [commentCount, setCommentCount] = useState(
@@ -72,28 +73,51 @@ const PostCard = ({ post }) => {
   }
 };
 
+  const handleDelete = async () => {
+    if (!window.confirm('Delete this post?')) return
+    try {
+      const { data } = await api.delete(`/api/post/${post._id}`, {
+        headers: { Authorization: `Bearer ${await getToken()}` }
+      })
+      if (data.success) {
+        toast.success('Post deleted')
+        setDeleted(true)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
+
+  if (deleted) return null
+
   return (
     <div className='bg-white rounded-xl shadow p-4 space-y-4 w-full max-w-2xl'>
 
       {/* USER INFO */}
-      <div
-        onClick={() => navigate('/profile/' + post.user._id)}
-        className='inline-flex items-center gap-3 cursor-pointer'
-      >
-        <img
-          src={post.user.profile_picture}
-          alt=""
-          className='w-10 h-10 rounded-full shadow'
-        />
-        <div>
-          <div className='flex items-center space-x-1'>
-            <span>{post.user.full_name}</span>
-            <BadgeCheck className='w-4 h-4 text-blue-500' />
-          </div>
-          <div className='text-gray-500 text-sm'>
-            @{post.user.username} • {moment(post.createdAt).fromNow()}
+      <div className='flex items-center justify-between'>
+        <div
+          onClick={() => navigate('/profile/' + post.user._id)}
+          className='inline-flex items-center gap-3 cursor-pointer'
+        >
+          <img src={post.user.profile_picture} alt="" className='w-10 h-10 rounded-full shadow'/>
+          <div>
+            <div className='flex items-center space-x-1'>
+              <span>{post.user.full_name}</span>
+              <BadgeCheck className='w-4 h-4 text-blue-500' />
+            </div>
+            <div className='text-gray-500 text-sm'>
+              @{post.user.username} • {moment(post.createdAt).fromNow()}
+            </div>
           </div>
         </div>
+
+        {showDelete && currentUser && String(currentUser._id) === String(post.user?._id || post.user) && (
+          <button onClick={handleDelete} className='p-2 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition cursor-pointer'>
+            <Trash2 className='w-4 h-4'/>
+          </button>
+        )}
       </div>
 
       {/* CONTENT */}
